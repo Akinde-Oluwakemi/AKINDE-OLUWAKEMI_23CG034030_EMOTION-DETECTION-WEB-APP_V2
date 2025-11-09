@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Result — Emotion Detection v2</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Analysis Result</h1>
+      <p class="muted">Result from DeepFace pretrained emotion model</p>
+    </header>
+
+    <main>
+      <div class="result-grid">
+        <div class="card">
+          <h3>Annotated image</h3>
+          <img src="{{ url_for('uploads', filename=filename) }}" alt="annotated image" class="preview-img" />
+        </div>
+
+        <div class="card">
+          <h3>Dominant emotion</h3>
+          <p class="dominant">{{ dominant_emotion }}</p>
+
+          <h4>Raw probabilities</h4>
+          <div class="emotions-list">
+            {% for k, v in emotions.items() %}
+              <div class="emotion-row">
+                <div class="emotion-name">{{ k }}</div>
+                <div class="emotion-value">{{ "%.2f"|format(v) }}%</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div style="margin-top:12px;">
+            <a class="btn" href="{{ url_for('index') }}">Analyze another</a>
+            <a class="btn" href="{{ url_for('history') }}">View history</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <small>Note: Model predictions are not clinical. They are statistical outputs from a pretrained model.</small>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Emotion Detection App v2</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Emotion Detection (v2)</h1>
+      <p class="muted">Upload a clear face photo or capture from webcam. Uses DeepFace pretrained emotion model.</p>
+    </header>
+
+    <main>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-area">
+            {% for cat, msg in messages %}
+              <div class="flash {{ cat }}">{{ msg }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form id="uploadForm" method="POST" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
+        <div class="form-row">
+          <label for="name">Name (optional)</label>
+          <input id="name" name="name" type="text" placeholder="John Doe" />
+        </div>
+        <div class="form-row">
+          <label for="email">Email (optional)</label>
+          <input id="email" name="email" type="email" placeholder="you@example.com" />
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Upload an image</h3>
+            <input type="file" name="photo" accept="image/*" onchange="showPreview(event, 'previewUpload')"/>
+            <img id="previewUpload" style="max-width:200px; display:none; margin-top:8px;" />
+            <div style="margin-top:10px;">
+              <button class="btn primary" type="submit">Analyze Upload</button>
+            </div>
+            <p class="note">Allowed types: png, jpg, jpeg, gif</p>
+          </div>
+
+          <div class="card">
+            <h3>Use webcam</h3>
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display:none"></canvas>
+            <div class="controls">
+              <button type="button" class="btn" id="startBtn">Start Camera</button>
+              <button type="button" class="btn primary" id="snapBtn">Capture & Analyze</button>
+              <button type="button" class="btn" id="stopBtn">Stop Camera</button>
+            </div>
+            <p class="note">If prompted, allow the browser to use your camera. On some browsers webcam works only on HTTPS (or localhost).</p>
+          </div>
+        </div>
+      </form>
+
+      <div id="loading" style="display:none; margin-top:12px;">Analyzing image... ⏳</div>
+
+      <hr />
+      <div class="links">
+        <a class="btn" href="{{ url_for('history') }}">View History</a>
+        <a class="btn" href="{{ url_for('index') }}">Refresh</a>
+      </div>
+    </main>
+
+    <footer>
+      <small>Built with DeepFace · Do not use for medical/diagnostic decisions.</small>
+    </footer>
+  </div>
+
+<script>
+  function showPreview(evt, id) {
+    const file = evt.target.files[0];
+    if (!file) return;
+    const img = document.getElementById(id);
+    img.src = URL.createObjectURL(file);
+    img.style.display = 'block';
+  }
+
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn  = document.getElementById('stopBtn');
+  const snapBtn  = document.getElementById('snapBtn');
+  const video    = document.getElementById('video');
+  const canvas   = document.getElementById('canvas');
+  const loading  = document.getElementById('loading');
+  const form     = document.getElementById('uploadForm');
+
+  let stream = null;
+
+  startBtn.addEventListener('click', async () => {
+    if (stream) return;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+      video.srcObject = stream;
+    } catch (err) {
+      alert('Cannot access camera: ' + err.message);
+    }
+  });
+
+  stopBtn.addEventListener('click', () => {
+    if (!stream) return;
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+    video.srcObject = null;
+  });
+
+  snapBtn.addEventListener('click', () => {
+    if (!stream) { alert('Start the camera first'); return; }
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataURL = canvas.toDataURL('image/png');
+
+    let existing = document.querySelector('input[name="webcam_data"]');
+    if (existing) existing.value = dataURL;
+    else {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'webcam_data';
+      input.value = dataURL;
+      form.appendChild(input);
+    }
+    // show loading message
+    loading.style.display = 'block';
+    form.submit();
+  });
+
+  // show loading indicator on upload submit
+  form.addEventListener('submit', () => {
+    loading.style.display = 'block';
+  });
+</script>
+</body>
+</html>

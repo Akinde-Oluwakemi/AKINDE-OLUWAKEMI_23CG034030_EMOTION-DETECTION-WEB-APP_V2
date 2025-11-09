@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: akinde-emotion-v2
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: FLASK_SECRET_KEY
+        value: akinde_render_secret_v2

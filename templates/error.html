@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Error — Emotion Detection v2</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Oops — an error occurred</h1>
+    </header>
+
+    <main>
+      <div class="card">
+        <p>{{ message or "An unexpected error occurred." }}</p>
+        <div style="margin-top:12px;">
+          <a class="btn" href="{{ url_for('index') }}">Go home</a>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <small>If the error persists, check server logs or contact your instructor.</small>
+    </footer>
+  </div>
+</body>
+</html>

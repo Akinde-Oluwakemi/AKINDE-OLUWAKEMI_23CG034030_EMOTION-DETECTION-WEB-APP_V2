@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>History — Emotion Detection v2</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Submission History</h1>
+      <p class="muted">Latest submissions (local SQLite DB)</p>
+    </header>
+
+    <main>
+      {% if rows %}
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Image</th>
+              <th>Dominant</th>
+              <th>Timestamp (UTC)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td>{{ r[0] }}</td>
+                <td>{{ r[1] or '-' }}</td>
+                <td>{{ r[2] or '-' }}</td>
+                <td><a href="{{ url_for('uploads', filename=r[4]) }}" target="_blank">View</a></td>
+                <td>{{ r[5] }}</td>
+                <td>{{ r[7] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No submissions yet.</p>
+      {% endif %}
+
+      <div style="margin-top:12px;">
+        <a class="btn" href="{{ url_for('index') }}">Back</a>
+        <a class="btn primary" href="{{ url_for('download_history') }}">Download CSV</a>
+      </div>
+    </main>
+
+    <footer>
+      <small>DB file: emotion_app.db (created in project root)</small>
+    </footer>
+  </div>
+</body>
+</html>
